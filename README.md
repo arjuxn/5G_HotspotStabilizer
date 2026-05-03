@@ -1,4 +1,4 @@
-# Jio5G-Stabilizer
+# 5G-Stabilizer
 
 A lightweight Windows utility that smooths internet traffic to help stabilize Jio 5G hotspot connections during large downloads.
 
