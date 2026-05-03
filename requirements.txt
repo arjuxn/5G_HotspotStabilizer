@@ -1,0 +1,4 @@
+psutil
+pydivert
+PyQt6
+pyinstaller
