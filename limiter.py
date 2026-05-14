@@ -102,7 +102,6 @@ with pydivert.WinDivert("true") as w:
             bytes_in_window = 0
             window_start = current_time
 
-
         if (
             bytes_in_window + packet_size
             > MAX_BYTES_PER_WINDOW
