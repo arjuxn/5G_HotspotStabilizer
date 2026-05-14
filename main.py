@@ -12,26 +12,14 @@ from PyQt6.QtWidgets import (
     QVBoxLayout
 )
 
-# ====================================
-# SETTINGS
-# ====================================
-
 MAX_MBPS = 8
 DELAY = 0.004
 WINDOW_DURATION = 0.05
 
-# ====================================
-# GLOBALS
-# ====================================
-
 running = False
 
-# ====================================
-# LIMITER FUNCTION
-# ====================================
 
 def run_limiter(speed_label, status_label):
-
     global running
 
     MAX_BYTES_PER_SEC = (
@@ -56,13 +44,9 @@ def run_limiter(speed_label, status_label):
             packet = w.recv()
 
             current_time = time.time()
-
             packet_size = len(packet.raw)
 
-            # ====================================
-            # SPEED DISPLAY
-            # ====================================
-
+            # Update speed display
             if current_time - speed_timer >= 1:
 
                 new_data = psutil.net_io_counters()
@@ -72,12 +56,10 @@ def run_limiter(speed_label, status_label):
                     - old_data.bytes_recv
                 )
 
-                # MB/s
                 mb_per_sec = (
                     bytes_recv
                 ) / 1_000_000
 
-                # Mbps
                 mbps = (
                     bytes_recv * 8
                 ) / 1_000_000
@@ -90,19 +72,12 @@ def run_limiter(speed_label, status_label):
                 old_data = new_data
                 speed_timer = current_time
 
-            # ====================================
-            # ONLY INBOUND
-            # ====================================
-
+            # Pass outbound packets directly
             if not packet.is_inbound:
-
                 w.send(packet)
                 continue
 
-            # ====================================
-            # RESET WINDOW
-            # ====================================
-
+            # Reset bandwidth window
             if (
                 current_time
                 - window_start
@@ -112,10 +87,7 @@ def run_limiter(speed_label, status_label):
                 bytes_in_window = 0
                 window_start = current_time
 
-            # ====================================
-            # SHAPING
-            # ====================================
-
+            # Apply bandwidth shaping
             if (
                 bytes_in_window
                 + packet_size
@@ -127,10 +99,6 @@ def run_limiter(speed_label, status_label):
                 bytes_in_window = 0
                 window_start = time.time()
 
-            # ====================================
-            # SEND PACKET
-            # ====================================
-
             w.send(packet)
 
             bytes_in_window += packet_size
@@ -141,9 +109,6 @@ def run_limiter(speed_label, status_label):
 
     status_label.setText("Stopped")
 
-# ====================================
-# GUI
-# ====================================
 
 class Window(QWidget):
 
@@ -156,12 +121,7 @@ class Window(QWidget):
         )
 
         self.resize(500, 250)
-
         self.setMinimumSize(400, 200)
-
-        # ====================================
-        # DARK MODE STYLE
-        # ====================================
 
         self.setStyleSheet("""
             QWidget {
@@ -182,10 +142,6 @@ class Window(QWidget):
                 background-color: #4a4d50;
             }
         """)
-
-        # ====================================
-        # LABELS
-        # ====================================
 
         self.speed_label = QLabel(
             "0.00 MB/s  |  0.00 Mbps"
@@ -211,10 +167,6 @@ class Window(QWidget):
             """
         )
 
-        # ====================================
-        # BUTTONS
-        # ====================================
-
         self.start_button = QPushButton(
             "Start"
         )
@@ -234,10 +186,6 @@ class Window(QWidget):
             self.stop_limiter
         )
 
-        # ====================================
-        # LAYOUT
-        # ====================================
-
         layout = QVBoxLayout()
 
         layout.setSpacing(15)
@@ -255,10 +203,6 @@ class Window(QWidget):
         layout.addWidget(self.stop_button)
 
         self.setLayout(layout)
-
-    # ====================================
-    # START
-    # ====================================
 
     def start_limiter(self):
 
@@ -290,10 +234,6 @@ class Window(QWidget):
             daemon=True
         ).start()
 
-    # ====================================
-    # STOP
-    # ====================================
-
     def stop_limiter(self):
 
         global running
@@ -316,9 +256,6 @@ class Window(QWidget):
             """
         )
 
-# ====================================
-# APP
-# ====================================
 
 app = QApplication(sys.argv)
 
